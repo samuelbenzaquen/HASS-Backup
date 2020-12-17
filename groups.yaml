@@ -1,0 +1,110 @@
+ temperature:
+  name: Temperature
+  entities:
+   - sensor.outside_temperature
+   - sensor.outside_humidity
+   - sensor.nest_thermostat_temperature
+   - sensor.nest_thermostat_humidity
+   - sensor.honeywell_temperature
+   - sensor.basement_temperature
+   - sensor.basement_humidity
+   - sensor.mold_indicator
+   - sensor.dht1_temperature
+   - sensor.dht1_humidity
+ 
+ automation:
+  name: Automation
+  entities:
+   - automation.honeywell_cool
+   - automation.honeywell_heat
+   - automation.lora_garage
+   - automation.lora_mazda
+   - automation.robbie
+   - automation.lenny
+   - automation.kitchen_light
+   - automation.mazda
+   - automation.alarm_enable
+   - automation.turn_humidifier_off
+   - automation.turn_humidifier_on
+   
+ lights:
+  name: Home Lights
+  entities:
+   - cover.garage  
+   - switch.4884502084f3eb8abb49
+   - group.downstairs
+   - light.back_porch
+   - light.socket2
+   - light.grow
+   - light.back_door
+   - light.hallway
+   - light.night
+   - light.ceiling_fan
+   - light.ceiling_light
+   - light.charger
+   - light.humidifier
+   - light.third_floor
+   - light.love
+   - light.window_fan
+   - light.sonoff6
+   - light.socket3
+   - light.Socket6   
+   - light.socket7
+   - light.porch_strip
+   - vacuum.prime
+
+
+ 
+ downstairs:
+  name: Downstairs
+  entities:
+   - light.socket4
+   - light.socket5
+ 
+ media:
+  name: Media Players
+  entities:
+   - sensor.plex_server
+   - media_player.plex_living_room
+   - media_player.cube_1_stark_2
+   - media_player.cube_2_2
+   - media_player.dot_2g_2
+   - media_player.dot_3g_2
+   - media_player.sam_s_fire_stick_2
+   - media_player.sam_s_tap_2
+   - media_player.samuel_s_2nd_echo_dot
+   - media_player.samuel_s_2nd_fire_tv_stick
+   - media_player.this_device_2
+
+ 
+ security:
+  name: Security
+  entities:
+   - alarm_control_panel.HA_alarm
+   - automation.SMS
+   - automation.EMAIL
+   - automation.TTS
+   - automation.LED_strip
+   - automation.garage
+   - automation.mudroom
+   - automation.water_s1
+   - automation.PIR1
+   - automation.spigen_motion
+   - automation.smoke
+   - camera.backyard
+   - camera.front_door
+   - camera.back_door
+   
+ home_devices:
+  name: Home Devices
+  entities:
+   - device_tracker.sam
+   - device_tracker.sammy
+ 
+ spigen:
+  name: Spigen
+  entities:
+   - camera.spigen
+   - cover.spigen_rightleft
+   - cover.spigen_updown
+   - cover.garage

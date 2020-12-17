@@ -1,0 +1,295 @@
+title: Los Sams Home
+# Include external resources
+resources:
+  - url: /local/my-webfont.css
+    type: css
+  - url: /local/community/mini-graph-card/mini-graph-card-bundle.js
+    type: module
+  - url: /local/community/mini-media-player/mini-media-player-bundle.js
+    type: module 
+  - url: /local/community/simple-thermostat/simple-thermostat.js
+    type: module
+
+views:
+  - icon: mdi:home-assistant
+    title: Home
+    id: Home
+    panel: true
+    cards:
+        - type: vertical-stack
+          cards:
+          - type: horizontal-stack
+            cards:
+              - type: entity-filter
+                entities:
+                   - device_tracker.sam
+                   - device_tracker.sammy
+                   - device_tracker.merchy
+                   - device_tracker.robbie
+                   - device_tracker.lenny
+                   - device_tracker.moshito
+                state_filter:
+                   - "home"
+                card:
+                  type: glance
+                  show_state: false
+                show_empty: false      
+          - type: horizontal-stack
+            cards:
+              - type: 'custom:simple-thermostat'
+                entity: climate.nest
+                control: false
+                name: false
+                icon: false
+                step_size: 1
+                decimals: 0
+                step_layout: row
+                sensors:
+                  - entity: sensor.nest_temperature
+                    name: Temperature
+                  - entity: sensor.nest_humidity
+                    name: Humidity
+                hide:
+                  temperature: true
+          - type: horizontal-stack
+            cards:
+              - type: entities
+                entities:
+                   - cover.garage_door
+                   - light.kitchen
+                   - group.downstairs
+                   - light.back_porch
+                   - light.socket2
+                   - light.grow
+                   - light.back_door
+                   - light.bnl1
+                show_header_toggle: false
+          - type: horizontal-stack
+            cards:
+              - type: entities
+                entities:
+                   - light.hallway
+                   - light.night
+                   - light.ceiling_fan
+                   - light.ceiling_light
+                   - light.charger
+                   - light.humidifier
+                   - light.lamp
+                   - light.socket3
+                   - light.bnl3
+                show_header_toggle: false
+          - type: horizontal-stack
+            cards:
+              - type: 'custom:simple-thermostat'
+                entity: climate.honeywell
+                control: false
+                name: false
+                icon: false
+                step_size: 1
+                decimals: 0
+                step_layout: row
+                
+                sensors:
+                  - entity: climate.honeywell
+                    name: State
+                  - entity: sensor.honeywell_temperature
+                    name: Temperature
+                  - entity: sensor.basement_humidity
+                    name: Humidity
+                hide:
+                  temperature: true
+          - type: horizontal-stack
+            cards:
+              - type: entities
+                entities:
+                   - light.third_floor
+                   - light.love
+                   - light.window_fan
+                   - light.sonoff6
+                   - light.socket7
+                   - light.bnl2
+                show_header_toggle: false
+          - type: horizontal-stack
+            cards:
+              - type: conditional
+                conditions:
+                  - entity: media_player.plex_majesty_pro_lte
+                    state: "playing"
+                card:
+                  type: media-control
+                  entity: media_player.plex_majesty_pro_lte
+              - type: conditional
+                conditions:
+                  - entity: media_player.plex_majesty_pro_lte
+                    state: "paused"
+                card:
+                  type: media-control
+                  entity: media_player.plex_majesty_pro_lte
+                show_empty: false
+                  
+
+  - icon: mdi:thermostat
+    id: Thermostat
+    panel: true
+    cards:
+        - type: vertical-stack
+          cards:
+            - type: thermostat
+              entity: climate.nest
+            - type: thermostat
+              entity: climate.honeywell
+  
+  - icon: mdi:radio
+    id: Media
+    panel: true
+    cards:
+        - type: vertical-stack
+          cards:
+            # - type: media-control
+              # entity: media_player.bathroom_2
+            # - type: media-control
+              # entity: media_player.kitchen_2
+            - type: custom:mini-media-player
+              entity: media_player.bathroom_2
+              icon: mdi:cast-audio
+              artwork: cover
+              hide:
+                power: true
+            - type: custom:mini-media-player
+              entity: media_player.kitchen_2
+              icon: mdi:cast-audio
+              artwork: cover
+              hide:
+                power: true
+            # - type: custom:mini-media-player
+              # entity: media_player.192_168_1_146
+              # icon: mdi:kodi
+              # artwork: cover
+              # hide:
+                # power: true
+              # shortcuts:
+                # buttons:
+                  # - data:
+                      # addonid: plugin.audio.pandoki
+                      # entity_id: media_player.kodi
+                      # method: Addons.ExecuteAddon
+                    # id: kodi.call_method
+                    # name: Pandoki
+                    # type: service
+            - type: custom:mini-media-player
+              entity: media_player.fire_cube_livingroom
+              artwork: cover
+              icon: mdi:television-classic
+
+  
+  - icon: mdi:thermometer-lines
+    title: Temperature
+    id: Temperature
+    panel: true
+    cards:
+        - type: vertical-stack
+          cards:
+          - type: weather-forecast
+            entity: weather.dark_sky
+            show_forecast: false
+          - type: horizontal-stack
+            cards:
+              - type: history-graph
+                title: Temperature
+                entities: 
+                  - sensor.outside_temperature
+                  - sensor.nest_temperature
+                  - sensor.honeywell_temperature
+                  - sensor.basement_temperature
+                  - sensor.dht1_temperature
+          - type: horizontal-stack
+            cards:
+              - type: history-graph
+                title: Humidity
+                entities: 
+                  - sensor.outside_humidity
+                  - sensor.nest_humidity
+                  - sensor.basement_humidity
+                  - sensor.dht1_humidity
+          - type: horizontal-stack
+            cards:
+              - type: history-graph
+                title: Plant Moisture
+                hours_to_show: 120
+                entities: 
+                  - sensor.plant
+                         
+  - icon: mdi:shield-lock-outline
+    title: Alarm
+    id: Alarm
+    panel: true
+    cards:
+        - type: vertical-stack
+          cards:
+            - type: horizontal-stack
+              cards:
+                - type: entities
+                  entities:
+                     - cover.garage
+            - type: picture-entity
+              entity: camera.spigen
+              camera_view: live
+            - type: picture-entity
+              entity: camera.front_door
+              camera_view: live
+            - type: picture-entity
+              entity: camera.back_door
+              camera_view: live
+            - type: picture-entity
+              entity: camera.outside
+              camera_view: live
+ 
+  - icon: mdi:map-marker
+    title: Map
+    id: Map
+    panel: true
+    cards:
+        - type: vertical-stack
+          cards:
+            - type: map
+              entities:
+                - zone.home
+                - zone.in_laws
+                - device_tracker.sam
+                - device_tracker.sammy
+                - device_tracker.lenny_tile
+                - device_tracker.robbie_tile
+                - device_tracker.oneplus
+              dark_mode: true
+              hours_to_show: 24
+ 
+  - icon: mdi:cog
+    title: other
+    id: other
+    panel: true
+    cards:
+        - type: vertical-stack
+          cards:
+          - type: horizontal-stack
+            cards:
+              - type: entities
+                entities:
+                   - sun.sun
+                   - switch.pillbottle
+                   - vacuum.prime
+          - type: horizontal-stack
+            cards:
+              - type: custom:mini-graph-card
+                entities:
+                   - sensor.plex_server
+                smoothing: false
+                points_per_hour: 60
+                line_width: 2
+                line_color: "#5F9BEA"
+                show:
+                  points: false
+          - type: horizontal-stack
+            cards:
+              - type: entities
+                entities:
+                   - cover.tv_stand

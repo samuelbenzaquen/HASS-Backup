@@ -1,0 +1,825 @@
+  - id: hass_Start
+    alias: start
+    trigger:
+    - platform: homeassistant
+      event: start
+    action:
+    - service: notify.sms
+      data:
+       title: 'HA'
+       message: 'Your Home Assistant is Active'
+ 
+  - id: sms
+    alias: sms
+    trigger:
+     platform: mqtt
+     topic: "/Alert/Message/"
+    action:
+     - service: notify.sms
+       data_template:
+        title: 'HA'
+        message: "{{ trigger.payload }}"
+        
+  - id: email
+    alias: email
+    initial_state: 'off'
+    trigger:
+     platform: mqtt
+     topic: "/Alert/Message/"
+    action:
+     - service: notify.email
+       data_template:
+        title: 'HA'
+        message: "{{ trigger.payload }}"
+  
+  - id: tts
+    alias: tts
+    initial_state: 'off'
+    trigger:
+     platform: mqtt
+     topic: "/Alert/Message/"
+    condition:
+     - condition: state
+       entity_id: sun.sun
+       state: 'above_horizon'
+    action:
+     - service: notify.alexa_media
+       data_template:
+        message: '{{ trigger.payload }}'
+        data:
+          type: tts      
+        target:
+          - media_player.echo_flex
+ 
+  - id: alexa_announcement
+    alias: alexa announcement
+    initial_state: 'on'
+    trigger:
+     platform: mqtt
+     topic: "/Alert/Announcement/"
+    action:
+     - service: notify.alexa_media
+       data_template:
+        message: '{{ trigger.payload }}'
+        title: 'HA Announcement'
+        data:
+          type: announce
+          method: all
+        target:
+          - media_player.cube_2_2
+          - media_player.cube_1_stark_2
+
+  - id: LED_strip
+    alias: LED strip
+    trigger:
+     platform: mqtt
+     topic: "/Alert/Message/"
+    action:
+     - service: script.turn_on
+       entity_id: script.alert_script
+       
+  - id: ESL
+    alias: ESL
+    trigger:
+     platform: mqtt
+     topic: "/Alert/Message/"
+    action:
+     - service: rest_command.update_esl
+       data_template:
+         label4: "{{ trigger.payload }}"
+     - service: rest_command.led_esl
+       data_template:
+         mac: "ac233fd00334"
+         color: "1"
+        
+  - id: pir1
+    alias: pir1
+    trigger:
+     - platform: mqtt
+       topic: "/ESPEasy1/PIR/State"
+    action:
+     - service: script.turn_off
+       entity_id: script.pir_timer
+     - service: script.turn_on
+       entity_id: script.pir_timer
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "PIR1 has been triggered"
+        
+  - id: water_s1
+    alias: water s1
+    trigger:
+     - platform: mqtt
+       topic: "/WaterS1/Sensor/State"
+       payload: '1'
+    action:
+     - service: script.turn_on
+       entity_id: script.WaterS1_Delay
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "Water Sensor 1 Triggered"
+
+  - id: smoke
+    alias: smoke
+    trigger:
+     - platform: mqtt
+       topic: "/Smoke/MQ2/State"
+       payload: '1'
+     - platform: mqtt
+       topic: "/Smoke/MQ7/State"
+       payload: '1'
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "Smoke Detector Triggered"
+        
+  - id: nest_state
+    alias: nest state
+    trigger:
+     - platform: state
+       entity_id: sensor.nest_thermostat_hvac_state
+    condition:
+     - condition: state
+       entity_id: group.all_devices
+       state: 'not_home'
+#    condition:
+#     - condition: template
+#       value_template: '{{ (states.sensor.nest_thermostat_hvac_state.state) != "off" }}'
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "Nest State Changed to {{ states.sensor.nest_thermostat_hvac_state.state }}"
+ 
+  - id: honeywell_state
+    alias: honeywell state
+    trigger:
+     - platform: state
+       entity_id: sensor.honeywell_state
+       to: "running"
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "Honeywell is On"
+#        payload: "Honeywell State Changed to {{ states.sensor.honeywell_state.state }}"
+  
+  - id: spigen_motion
+    alias: spigen motion
+    trigger:
+     - platform: state
+       entity_id: binary_sensor.spigen
+       to: "on"
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "Motion detected by Spigen Camera"
+     - service: camera.snapshot
+       data:
+        entity_id: camera.spigen
+        filename: 'www/motion/spigen.jpg'
+     - service: notify.email
+       data_template:
+         title: 'Someone is here'
+         message: "Who is it?"
+         data:
+           images:
+             - www/motion/spigen.jpg
+        
+  - id: mudroom
+    alias: mudroom
+    trigger:
+     - platform: mqtt
+       topic: "/ESP_Kitchen/Button/Switch"
+       payload: '0'
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "Mudroom Door has been Opened"
+        
+  - id: mazda
+    alias: mazda
+    trigger:
+     - platform: mqtt
+       topic: "/Car/Mazda"
+       payload: 'HOME'
+    condition:
+     - condition: state
+       entity_id: device_tracker.sam
+       state: 'not_home'
+     - condition: state
+       entity_id: cover.garage
+       state: 'closed'
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "Mazda is back home, opening garage door"
+     - service: light.turn_on
+       entity_id: light.garage
+
+  - id: mail
+    alias: mail
+    trigger:
+     - platform: mqtt
+       topic: "/Mail"
+       payload: 'OPEN'
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "You've got mail"      
+       
+  - id: garage
+    alias: garage
+    trigger:
+     - platform: state
+       entity_id: cover.garage
+       from: "closed"
+       to: "open"
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "Garage Door has been Opened"
+     - service: mqtt.publish
+       data:        
+        topic: "/ESP/LED1/Color"
+        payload: "r::0,g::255,b::0"        
+
+  - id: sammy_home
+    alias: sammy_home
+    trigger:
+     - platform: state
+       entity_id: device_tracker.sammy
+       from: "not_home"
+       to: "home"
+    action:
+     - service: automation.turn_off
+       entity_id: automation.tts
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "Baby is home"
+
+  - id: sammy_not_home
+    alias: sammy_not_home
+    trigger:
+     - platform: state
+       entity_id: device_tracker.sammy
+       from: "home"
+       to: "not_home"
+    action:
+     - service: automation.turn_on
+       entity_id: automation.tts
+     # - service: mqtt.publish
+       # data:
+        # topic: "/Alert/Message/"
+        # payload: "Baby left"
+        
+  - id: robbie
+    alias: robbie
+    trigger:
+     - platform: state
+       entity_id: device_tracker.robbie
+       from: "not_home"
+       to: "home"
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "Hello Robbie, Nice to see you again!"
+
+  - id: lenny
+    alias: lenny
+    trigger:
+     - platform: state
+       entity_id: device_tracker.lenny
+       from: "not_home"
+       to: "home"
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "Hi Lenny, Anything interesting on the Times today?"
+        
+  - id: moshito
+    alias: moshito
+    trigger:
+     - platform: state
+       entity_id: device_tracker.moshito
+       from: "not_home"
+       to: "home"
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "Hi Mosh, how are the Patriots doing this season?"
+
+  - id: alarm_disable
+    alias: alarm disable
+    trigger:
+     - platform: state
+       entity_id: group.home_devices
+       to: "home"
+    action:
+     - service: alarm_control_panel.alarm_disarm
+       data:
+        entity_id: alarm_control_panel.ha_alarm
+        code: !secret alarm_code
+     - service: script.turn_on
+       entity_id: script.nest_heat_home
+     - service: script.turn_on
+       entity_id: script.nest_cool_home        
+       
+  - id: alarm_enable
+    alias: alarm enable
+    trigger:
+     - platform: state
+       entity_id: group.home_devices
+       to: "not_home"
+    action:
+     - service: alarm_control_panel.alarm_arm_away
+       data:
+        entity_id: alarm_control_panel.ha_alarm
+        code: !secret alarm_code
+     - service: climate.set_preset_mode
+       data:
+        entity_id: climate.honeywell
+        preset_mode: away   
+     - service: script.turn_on
+       entity_id: script.nest_heat_away    
+     - service: script.turn_on
+       entity_id: script.nest_cool_away   
+        
+  - id: kitchen_light
+    alias: kitchen light
+    trigger:
+     - platform: mqtt
+       topic: "/ESP_Kitchen/Button/Switch"
+       payload: '0'
+    condition:
+      - condition: state
+        entity_id: sun.sun
+        state: 'below_horizon'
+      - condition: state
+        entity_id: group.all_devices
+        state: 'not_home'
+    action:
+     - service: switch.turn_on
+       entity_id: switch.4884502084f3eb8abb49
+       
+  - id: amazon_stock
+    alias: amazon stock
+    trigger:
+     - platform: state
+       entity_id: sensor.amazon
+    action:
+     - service: rest_command.amzn_esl
+       data_template:
+         price: "{{ states.sensor.amazon.state|float }}"
+     - service: mqtt.publish
+       data_template:        
+        topic: "/Stocks/AMZN/State"
+        payload_template: "{{ states.sensor.amazon.state }}"
+     - service: mqtt.publish
+       data_template:        
+        topic: "/Stocks/AMZN/Change"
+        payload_template: "{{ (((states.sensor.amazon.state)|float / (states.sensor.amazon.attributes.close)|float))*100 }}"
+        
+  - id: hass_theme
+    alias: hass_theme
+    initial_state: 'on'
+    trigger:
+      - platform: state
+        entity_id: input_select.hass_theme
+    action:
+      - service: frontend.set_theme
+        data_template:
+          name: "{{ states.input_select.hass_theme.state }}"
+          
+  # - id: honeywell_off
+    # alias: honeywell off
+    # trigger:
+    # - platform: time_pattern
+      # hours: '18'
+      # minutes: '00'
+      # seconds: '00'
+    # condition:
+    # - condition: template
+      # value_template: "{{ not is_state('states.climate.honeywell.attributes.operation_mode', 'off') }}"
+    # action:
+    # - service: climate.set_operation_mode
+      # data:
+        # entity_id: climate.honeywell
+        # operation_mode: 'off'
+    # - service: mqtt.publish
+      # data:
+        # topic: "/Alert/Message/"
+        # payload: "Honeywell has been turned off"
+
+  - id: honeywell_cool
+    alias: honeywell cool
+    trigger:
+    - platform: time_pattern
+      hours: '18'
+      minutes: '00'
+      seconds: '00'
+    condition:
+    - condition: state
+      entity_id: climate.honeywell
+      state: "cool"
+    action:
+    - service: climate.set_temperature
+      data:
+        entity_id: climate.honeywell
+        temperature: 90
+    - service: mqtt.publish
+      data:
+        topic: "/Alert/Message/"
+        payload: "Honeywell has been set to 90 degrees"
+
+  - id: honeywell_heat
+    alias: honeywell heat
+    trigger:
+    - platform: time_pattern
+      hours: '18'
+      minutes: '00'
+      seconds: '00'
+    condition:
+    - condition: state
+      entity_id: climate.honeywell
+      state: "heat"
+    action:
+    - service: climate.set_temperature
+      data:
+        entity_id: climate.honeywell
+        temperature: 55
+    - service: mqtt.publish
+      data:
+        topic: "/Alert/Message/"
+        payload: "Honeywell has been set to 55 degrees"
+        
+  - id: shabbat_candles
+    alias: shabbat candles
+    trigger:
+    - platform: sun
+      event: sunset
+      offset: "-0:18:00"
+    condition:
+      - condition: time
+        weekday:
+        - fri
+    action:
+    - service: mqtt.publish
+      data:
+        topic: "/Alert/Message/"
+        payload: "18 minutes till Sunset"
+    - service: mqtt.publish
+      data:
+        topic: "/Alert/Announcement/"
+        payload: "18 minutes till Sunset - Shabbat Shalom"
+    - service: light.turn_on
+      entity_id: light.socket2
+  
+  - id: sub_pump
+    alias: sub pump
+    trigger:
+      platform: numeric_state
+      entity_id: sensor.pow1_power
+      above: '50'
+    action:
+    - service: mqtt.publish
+      data:
+        topic: "/Alert/Message/"
+        payload: "POW1 is above 50"
+        
+  - id: rgb_Strip
+    alias: rgb strip
+    trigger:
+    - platform: state
+      entity_id: sensor.rgb
+    action:
+    - service: shell_command.set_rgb
+    
+    
+  - id: phone_charger
+    alias: phone charger
+    trigger:
+      platform: state
+      entity_id: light.charger
+      from: 'off'
+      to: 'on'
+    action:
+    - service: timer.start
+      entity_id: timer.charger
+    
+  - id: timer_charger
+    alias: timer charger
+    trigger:
+      platform: event
+      event_type: timer.finished
+      event_data:
+       entity_id: timer.charger
+    action:
+    - service: light.turn_off
+      entity_id: light.charger
+      
+  - id: pillbottle
+    alias: pillbottle
+    trigger:
+      platform: state
+      entity_id: switch.pillbottle
+      from: 'off'
+      to: 'on'
+    action:
+    - service: timer.start
+      entity_id: timer.pillbottle
+    - service: mqtt.publish
+      data:
+        topic: "/Alert/Message/"
+        payload: "Pill-DONE"
+    
+  - id: timer_pillbottle
+    alias: timer pillbottle
+    trigger:
+      platform: event
+      event_type: timer.finished
+      event_data:
+       entity_id: timer.pillbottle
+    action:
+    - service: switch.turn_off
+      entity_id: switch.pillbottle      
+ 
+      
+  - id: sunset
+    alias: sunset
+    trigger:
+    - platform: sun
+      event: sunset
+    action:
+    - service: light.turn_on
+      entity_id: light.grow
+    - service: light.turn_on
+      entity_id: light.back_door
+    #- service: rest_command.hyperion_on
+  
+  - id: sunrise
+    alias: sunrise
+    trigger:
+    - platform: sun
+      event: sunrise
+    action:
+    - service: light.turn_off
+      entity_id: light.grow
+    - service: light.turn_off
+      entity_id: light.back_door
+    - service: light.turn_off
+      entity_id: light.socket1
+    #- service: rest_command.hyperion_off
+      
+  - id: Turn_Humidifier_On
+    alias: Turn Humidifier On
+    trigger:
+     - platform: time_pattern
+       minutes: '/10'
+       seconds: '00'
+    condition:
+     condition: numeric_state
+     entity_id: sensor.mold_indicator
+     above: 60
+    action:
+     - service: light.turn_on
+       entity_id: light.pow1
+
+  - id: Turn_Humidifier_Off      
+    alias: Turn Humidifier Off
+    trigger:
+     - platform: time_pattern
+       minutes: '/10'
+       seconds: '00'
+    condition:
+     condition: numeric_state
+     entity_id: sensor.mold_indicator
+     below: 55
+    action:
+     - service: light.turn_off
+       entity_id: light.pow1
+       
+  - id: Backyard_Light     
+    alias: Backyard Light
+    trigger:
+     - platform: state
+       entity_id: binary_sensor.back_door_motion
+       from: 'off'
+       to: 'on'
+    condition:
+      - condition: state
+        entity_id: sun.sun
+        state: 'below_horizon'
+      - condition: state
+        entity_id: light.back_porch
+        state: 'off'
+    action:
+     - service: light.turn_on
+       entity_id: light.back_door
+     - service: script.turn_on
+       entity_id: script.backyardlight
+       
+  - id: LoRa_Garage
+    alias: LoRa Garage
+    trigger:
+     - platform: mqtt
+       topic: "/GarageDoor/Button"
+       payload: "0"
+    action:
+     - service: script.turn_on
+       entity_id: script.lora_garage
+        
+  - id: LoRa_Door_Open
+    alias: LoRa Door Open
+    trigger:
+     - platform: mqtt
+       topic: "/lora/outbound"
+       payload: "Door Open"
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/GarageDoor/Sensor"
+        payload: "0"
+   
+  - id: LoRa_Door_Close
+    alias: LoRa Door Close
+    trigger:
+     - platform: mqtt
+       topic: "/lora/outbound"
+       payload: "Door Close"
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/GarageDoor/Sensor"
+        payload: "1"
+   
+  - id: LoRa_Mazda
+    alias: LoRa Mazda
+    trigger:
+     - platform: mqtt
+       topic: "/lora/outbound"
+       payload: "Mazda is Home"
+    condition:
+     - condition: state
+       entity_id: device_tracker.sam
+       state: 'not_home'
+     - condition: state
+       entity_id: cover.garage
+       state: 'closed'
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/lora/inbound"
+        payload: "#mazda-R#"
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "Mazda is home"
+     - service: script.turn_on
+       entity_id: script.lora_mazda
+       
+       
+  - id: Plex_Viewer
+    alias: Plex Viewer
+    trigger:
+     - platform: state
+       entity_id: sensor.plex_server
+    condition:
+     - condition: numeric_state
+       entity_id: sensor.plex_server
+       above: 0
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload_template: >-
+            {% for attr in states.sensor.plex_server.attributes %}
+             {%- if not attr=="friendly_name" and not attr=="unit_of_measurement" and not attr=="icon" -%}
+              {{attr}} is watching {{states.sensor.plex_server.attributes[attr]}}
+             {%- endif %}
+            {%- endfor -%}
+            
+  - id: hallway_light   
+    alias: Hallway Light
+    trigger:
+     - platform: state
+       entity_id: light.hallway
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "cmnd/backdoor/POWER"
+        payload_template: '{{ states.light.hallway.state.upper() }}'
+        
+  - id: weather_mqtt   
+    alias: Weather MQTT
+    trigger:
+     - platform: state
+       entity_id: weather.dark_sky
+     - platform: state
+       entity_id: sun.sun
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/LEDMatrix"
+        payload_template: '{{ states.weather.dark_sky.state }}-{{ states.sun.sun.state }}-img'
+     - service: mqtt.publish
+       data:
+        topic: "/LEDMatrix"
+        payload_template: '{{ states.weather.dark_sky.attributes.temperature }}-tmp'
+        
+        
+  - id: soccer_rss
+    alias: Soccer RSS
+    trigger:
+     - platform: event
+       event_type: feedreader
+    condition:   
+     # - condition: template
+       # value_template: "{{ '0-0' not in trigger.event.data.title }}"
+     - condition: template
+       value_template: "{{ 'Barcelona' in trigger.event.data.title }}"
+    action:
+     - service: mqtt.publish
+       data_template:
+        topic: "/Alert/Message/"
+        payload_template: '{{ trigger.event.data.title }}-scr'
+     
+  - id: Plant
+    alias: Plant
+    trigger:
+     - platform: numeric_state
+       entity_id: sensor.plant
+       below: 30
+       for:
+         hours: 1
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/Alert/Message/"
+        payload: "Plant needs water"
+             
+  - id: update_token
+    alias: Update Token
+    trigger:
+      platform: time
+      at:
+        - "03:00:00"
+    action:
+     - service: shell_command.get_token
+     - service: homeassistant.restart
+  
+  - id: hyperion_on
+    alias: Hyperion On
+    trigger:
+     - platform: state
+       entity_id: media_player.fire_cube_livingroom
+       to: "playing"
+    condition:
+      - condition: state
+        entity_id: sun.sun
+        state: 'below_horizon'
+    action:
+     - service: rest_command.hyperion_on
+     
+  - id: hyperion_off
+    alias: Hyperion Off
+    trigger:
+     - platform: state
+       entity_id: media_player.fire_cube_livingroom
+       to: "idle"
+    action:
+     - service: rest_command.hyperion_off
+     
+  - id: IKEA_SA     
+    alias: IKEA_SA
+    trigger:
+     - platform: time_pattern
+       minutes: '/2'
+    action:
+     - service: light.turn_{{ states.light.hallway.state }}
+       entity_id: light.hallway
+
+  - id: garage_state 
+    alias: Garage State
+    trigger:
+     - platform: state
+       entity_id: cover.garage_door
+       to: "closed"
+    action:
+     - service: mqtt.publish
+       data:
+        topic: "/GarageDoor/Sensor"
+        payload: 1
+        

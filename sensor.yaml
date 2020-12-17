@@ -1,0 +1,160 @@
+  - platform: command_line
+    name: CPU Temperature
+    command: "cat /sys/class/thermal/thermal_zone0/temp"
+    unit_of_measurement: "C"
+    value_template: '{{ (value | multiply(0.001)) | round(0) }}'
+    
+  # - platform: command_line
+    # name: rest_token
+    # scan_interval: 600
+    # command: "curl -X -S POST -d '{'username':'Test023','password':'Amazon023'}' http://omega.yunli-wuli.com:9191/V1/Login"
+  
+  # - platform: rest
+    # name: rest_token
+    # resource: http://47.90.7.85:9191/V1/Login
+    # method: POST
+    # payload: '{"username":"Test023","password":"Amazon023"}'
+    # json_attributes_path: "$.body.token"
+    # json_attributes:
+      # - token
+  
+  - platform: time_date
+    display_options:
+     - 'time'
+
+  - platform: darksky
+    api_key: !secret darkskykey
+    name: Outside
+    monitored_conditions:
+     - temperature
+     - humidity
+     - summary
+  
+  - platform: mqtt
+    state_topic: '/NodeMCU/Servo1/State/'
+    name: 'Damper'
+
+  - platform: mqtt
+    name: Basement Humidity
+    state_topic: "tele/Basement/SENSOR"
+    value_template: '{{ value_json["SI7021"]["Humidity"] }}'
+    unit_of_measurement: "%"
+
+  - platform: mqtt
+    name: "Basement Temperature"
+    state_topic: "tele/Basement/SENSOR"
+    value_template: '{{ (((value_json["SI7021"]["Temperature"] | float) * 1.8) + 32) | round(0) }}'
+    unit_of_measurement: '°F'
+
+  - platform: mqtt
+    name: RGB
+    state_topic: "/LEDStrip/json/set"
+    value_template: '{{ value_json["color"]["r"] }},{{ value_json["color"]["g"] }},{{ value_json["color"]["b"] }}'
+ 
+  - platform: mqtt
+    name: DHT1 Temperature
+    state_topic: "/ESP-DHT1/DHT/Temperature"
+    unit_of_measurement: '°F'
+
+  - platform: mqtt
+    name: DHT1 Humidity
+    state_topic: "/ESP-DHT1/DHT/Humidity"
+    unit_of_measurement: "%"
+
+  - platform: mqtt
+    name: POW1 Power
+    state_topic: "tele/POW1/SENSOR"
+    value_template: '{{ value_json["ENERGY"]["Power"] }}'
+    unit_of_measurement: "W"
+    
+  - platform: mqtt
+    name: "RFID"
+    state_topic: "RFID/send"
+    value_template: "{{ value_json.username }}"
+    expire_after: 2
+    
+  - platform: mqtt
+    name: WMX
+    state_topic: "/Gyro/AcX"
+    unit_of_measurement: "L/min"
+    
+  - platform: mqtt
+    name: Plant
+    state_topic: "ESP_Plant/Level/Analog"
+    unit_of_measurement: "%"
+    
+  - platform: statistics
+    name: POW1 Stats
+    entity_id: sensor.pow1_power
+    sampling_size: 100
+ 
+#  - platform: ring
+
+  - platform: alpha_vantage
+    api_key: USP0CM5D4KY7TWGV
+    symbols:
+      - symbol: AMZN
+        name: Amazon
+
+  - platform: mold_indicator
+    indoor_temp_sensor: sensor.basement_temperature
+    indoor_humidity_sensor: sensor.basement_humidity
+    outdoor_temp_sensor: sensor.outside_temperature
+    calibration_factor: 1.5
+
+  - platform: ring
+
+  - platform: systemmonitor
+    resources:
+      - type: disk_use_percent
+        arg: /home
+      - type: memory_free
+
+  - platform: template
+    sensors:
+      pir1:
+        value_template: '{{ as_timestamp(states.automation.pir1.attributes.last_triggered) | timestamp_custom("%b %d %l:%M%p") }}'
+      waters1:
+        value_template: '{{ as_timestamp(states.automation.waters1.attributes.last_triggered) | timestamp_custom("%b %d %l:%M%p") }}'
+      spigen_motion:
+        value_template: '{{ as_timestamp(states.automation.spigen_motion.attributes.last_triggered) | timestamp_custom("%b %d %l:%M%p") }}'
+      rpi_motion:
+        value_template: '{{ as_timestamp(states.automation.garage_motion.attributes.last_triggered) | timestamp_custom("%b %d %l:%M%p") }}'
+      smoke:
+        value_template: '{{ as_timestamp(states.automation.smoke.attributes.last_triggered) | timestamp_custom("%b %d %l:%M%p") }}'
+      mudroom:
+        value_template: '{{ as_timestamp(states.automation.mudroom.attributes.last_triggered) | timestamp_custom("%b %d %l:%M%p") }}'
+      honeywell_temperature:
+        friendly_name: "Honeywell Temperature"
+        unit_of_measurement: '°F'
+        value_template: '{{ states.climate.honeywell.attributes.current_temperature }}'
+      honeywell_humidity:
+        friendly_name: "Honeywell Humidity"
+        unit_of_measurement: '%'
+        value_template: '{{ states.climate.honeywell.attributes.current_humidity }}'
+      honeywell_operation_mode:
+        friendly_name: "Honeywell Operation Mode"
+        value_template: '{{ states.climate.honeywell.attributes.operation_mode }}'
+      honeywell_state:
+        friendly_name: "Honeywell State"
+        value_template: '{{ states.climate.honeywell.attributes.fan }}'
+      # nest_temperature:
+        # friendly_name: "Nest Temperature"
+        # unit_of_measurement: '°F'
+        # value_template: '{{ states.climate.nest.attributes.current_temperature }}'
+      # nest_target_temperature:
+        # friendly_name: "Nest Target Temperature"
+        # unit_of_measurement: '°F'
+        # value_template: '{{ states.climate.nest.attributes.temperature }}'
+      # nest_humidity:
+        # friendly_name: "Nest Humidity"
+        # unit_of_measurement: '%'
+        # value_template: '{{ states.climate.nest.attributes.current_humidity }}'
+      # nest_thermostat_hvac_state:
+        # friendly_name: "Nest HVAC State"
+        # unit_of_measurement: '°F'
+        # value_template: '{{ states.climate.nest.attributes.hvac_action }}'
+      # wmx_change:
+        # friendly_name: "WMX Change"
+        # value_template: '{{ states.sensor.wmx_stats.attributes.change }}'
+        

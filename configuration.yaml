@@ -1,0 +1,280 @@
+
+# Configure a default setup of Home Assistant (frontend, api, etc)
+homeassistant:
+    customize: !include customize.yaml
+# Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+# http:
+#   base_url: example.duckdns.org:8123
+
+# Text to speech
+
+config:
+sun:
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+sensor: !include sensor.yaml
+switch: !include switch.yaml
+light: !include light.yaml
+
+zone:
+  - name: Home
+    latitude: 40.089120
+    longitude: -75.140402
+    radius: 100
+    icon: mdi:home-assistant
+  - name: In-Laws
+    latitude: 40.091218
+    longitude: -75.180331
+    radius: 100
+    icon: mdi:home-heart    
+    
+http:
+  base_url: https://lossams.duckdns.org
+  ssl_certificate: /ssl/fullchain.pem
+  ssl_key: /ssl/privkey.pem
+
+recorder:
+  purge_keep_days: 1
+  include:
+    domains:
+      - sensor
+      - binary_sensor
+      - climate
+      
+history:
+  include:
+    domains:
+      - sensor
+      - binary_sensor
+      - climate
+
+tts:
+  - platform: google_translate
+  
+frontend:
+    themes: !include_dir_merge_named themes/
+    
+lovelace:
+  mode: yaml
+  dashboards:
+    lovelace-mobile:
+      mode: yaml
+      filename: ui-lovelace.yaml
+      title: Mobile
+      icon: mdi:cellphone-android
+      show_in_sidebar: true
+      require_admin: true
+    lovelace-tablet:
+      mode: yaml
+      filename: tablet-lovelace.yaml
+      title: Tablet
+      icon: mdi:tablet
+      show_in_sidebar: true
+      require_admin: true
+
+group:
+  home_devices:
+   name: Home Devices
+   entities:
+    - device_tracker.sam
+    - device_tracker.sammy
+  downstairs:
+   name: Downstairs
+   entities:
+    - light.socket4
+    - light.socket5
+    
+emulated_hue:
+  expose_by_default: true
+  listen_port: 80
+  # entities:
+    # switch.garage:
+      # hidden: false
+  exposed_domains:
+    - light
+    
+cover:
+  - platform: command_line
+    covers:
+      spigen_updown:
+        command_open: 'curl -k "http://192.168.1.205/cgi-bin/hi3510/ptzctrl.cgi?-step=1&-act=down"'
+        command_close: 'curl -k "http://192.168.1.205/cgi-bin/hi3510/ptzctrl.cgi?-step=1&-act=up"'
+        command_stop: 'curl -k "http://192.168.1.205/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=stop"'
+      spigen_rightleft:
+        command_open: 'curl -k "http://192.168.1.205/cgi-bin/hi3510/ptzctrl.cgi?-step=1&-act=right"'
+        command_close: 'curl -k "http://192.168.1.205/cgi-bin/hi3510/ptzctrl.cgi?-step=1&-act=left"'
+        command_stop: 'curl -k "http://192.168.1.205/cgi-bin/hi3510/ptzctrl.cgi?-step=0&-act=stop"'
+  - platform: mqtt
+    name: "Garage"
+    command_topic: "/GarageDoor/Button"
+    state_topic: "/GarageDoor/Sensor"
+    payload_open: "0"
+    payload_close: "1"
+    payload_stop: "0"
+    state_open: "0"
+    state_closed: "1"
+  - platform: mqtt
+    name: "TV Stand"
+    command_topic: "/tvstand/button"
+    state_topic: "/tvstand/state"
+    payload_open: "0"
+    payload_close: "1"
+    payload_stop: "1"
+    state_open: "0"
+    state_closed: "1"
+    
+# badnest:
+  # issue_token: !secret nest_token
+  # cookie: !secret nest_cookie
+  # region: 'us'
+  
+nest:
+  client_id: !secret nest_client
+  client_secret: !secret nest_secret
+  project_id: !secret nest_project
+  subscriber_id: !secret nest_subscriber
+
+climate:
+  - platform: honeywell
+    username: samuel.benzaquen@gmail.com
+    password: !secret honeywell_password
+    region: 'us'
+    scan_interval: 600
+  # - platform: badnest
+    # scan_interval: 10
+
+device_tracker:
+  - platform: nmap_tracker
+    hosts: 192.168.1.1-255
+    interval_seconds: 60
+    consider_home: 300
+    track_new_devices: false
+    scan_options: " --privileged -sn "
+  - platform: ping
+    hosts:
+      sam: 192.168.1.46
+      sammy: 192.168.1.169
+ 
+# tuya:
+  # username: sbenzaquen.m@gmail.com
+  # password: !secret tuya_password
+  # country_code: 1
+
+speedtestdotnet:
+  scan_interval:
+    minutes: 30
+  monitored_conditions:
+    - ping
+    - download
+    - upload
+    
+alexa_media:
+  accounts:
+    - email: "samuel.benzaquen@gmail.com"
+      password: !secret amazon_password
+      url: "amazon.com"
+
+media_player:
+  - platform: androidtv
+    name: Fire Cube Livingroom
+    host: 192.168.1.132
+
+notify:
+  - name: SMS
+    platform: smtp
+    server: smtp.gmail.com
+    port: 587
+    sender: sbenzaquen.m@gmail.com
+    starttls: true
+    username: sbenzaquen.m@gmail.com
+    password: !secret gmail_password
+    recipient: 3216091129@tmomail.net
+  
+  - platform: nfandroidtv
+    name: Fire Cube Livingroom
+    host: 192.168.1.132
+    
+  - name: EMAIL
+    platform: smtp
+    server: smtp.gmail.com
+    port: 587
+    sender: sbenzaquen.m@gmail.com
+    starttls: true
+    username: sbenzaquen.m@gmail.com
+    password: !secret gmail_password
+    recipient: sbenzaquen.m@gmail.com
+  
+binary_sensor:
+  - platform: ring
+  - platform: ffmpeg_motion
+    name: spigen
+    changes: 5
+    input: -rtsp_transport tcp -i rtsp://admin:samsam88@192.168.1.205:554/11
+
+camera:
+  - platform: ffmpeg
+    name: spigen
+    input: -rtsp_transport tcp -i rtsp://admin:samsam88@192.168.1.205:554/11
+
+ecovacs:
+  username: !secret linksys_user
+  password: !secret api_password
+  country: us
+  continent: na
+
+timer:
+  test:
+    duration: '30'
+  charger:
+    duration: '3600'
+  pillbottle:
+    duration: '120'
+  
+weather:
+  - platform: darksky
+    api_key: !secret darkskykey
+    
+feedreader:
+  urls:
+    - https://www.scorespro.com/rss2/live-soccer.xml
+  scan_interval:
+    minutes: 2
+  max_entries: 10
+  
+shell_command:
+  get_token: json=$(curl -d '{"username":"Test023","password":"Amazon023"}' -S -X POST http://omega.yunli-wuli.com:9191/V1/Login | jq -r '.body.token') && echo $json && sed -i "s/\(rest_token:\)\(.*\)/\1 $json/" /config/secrets.yaml  
+
+rest_command:
+  update_esl:
+    url: http://omega.yunli-wuli.com:9191/V2/pub/binding/update
+    method: post
+    content_type: "application/json;charset=UTF-8"
+    payload: '{"mac":"ac233fd00334","storeUuid":"23","demoId":"fc663c010c4149a7a1867ddcaa203688","information":{"id":"Alert","label4":"{{ label4 }}"}}'
+    headers:
+      authorization: !secret rest_token
+      accept: 'Accept: */*'
+      user-agent: 'curl/7.69.1'
+  amzn_esl:
+    url: http://omega.yunli-wuli.com:9191/V2/pub/binding/update
+    method: post
+    content_type: "application/json; charset=UTF-8"
+    payload: '{"mac":"ac233fd00279","storeUuid":"23","demoId":"ee41fdd2a9cd42fc9bd533459723ebf9","information":{"id":"AMZN","label6":"{{ price }}"}}'
+    headers:
+      authorization: !secret rest_token
+  led_esl:
+    url: 'http://omega.yunli-wuli.com:9191/V2/label/led?storeUuid=23&mac={{ mac }}&color={{ color }}&total=5&period=100&interval=900&brigthness=100'
+    method: put
+    headers:
+      authorization: !secret rest_token
+  hyperion_on:
+    url: http://192.168.1.91:8090/json-rpc
+    method: post
+    payload: '{"command":"componentstate","componentstate":{"component":"LEDDEVICE","state":true}}'
+  hyperion_off:
+    url: http://192.168.1.91:8090/json-rpc
+    method: post
+    payload: '{"command":"componentstate","componentstate":{"component":"LEDDEVICE","state":false}}'      
+    
+    
+      

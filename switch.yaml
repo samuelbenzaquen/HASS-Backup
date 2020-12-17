@@ -1,0 +1,16 @@
+  - platform: mqtt
+    name: "Kitchen Door"
+    command_topic: "/ESP_Kitchen/Command"
+    state_topic: "/ESP_Kitchen/Button/Switch"
+    payload_on: "0"
+    payload_off: "1"
+    
+  - platform: mqtt
+    name: "PillBottle"
+    command_topic: "/PillBottle"
+    state_topic: "/PillBottle"
+    payload_on: "0"
+    payload_off: "1"  
+    
+  - platform: ring
+   

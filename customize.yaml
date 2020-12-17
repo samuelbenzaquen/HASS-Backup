@@ -1,0 +1,49 @@
+   switch.Fireplace:
+    icon: mdi:fire 
+    assumed_state: true
+   light.love:
+    icon: mdi:heart-box-outline
+   switch.4884502084f3eb8abb49:
+    icon: mdi:lightbulb
+   group.downstairs:
+    icon: mdi:lightbulb-multiple
+   cover.garage:
+    icon: mdi:garage
+   sensor.pi_temperature:
+    icon: mdi:thermometer
+   sensor.pi_humidity:
+    icon: mdi:water-percent
+   sensor.nest_thermostat_humidity:
+    icon: mdi:water-percent
+   sensor.outside_humidity:
+    icon: mdi:water-percent
+   sensor.basement_humidity:
+    icon: mdi:water-percent
+   sensor.dht1_humidity:
+    icon: mdi:water-percent
+   cover.spigen_updown:
+    icon: mdi:swap-vertical
+   cover.spigen_rightleft:
+    icon: mdi:swap-horizontal
+   sensor.honeywell_temperature:
+    icon: mdi:thermometer
+   climate.honeywell:
+    icon: mdi:thermostat-box
+   sensor.honeywell_state:
+    icon: mdi:fan
+   light.window_fan:
+    icon: mdi:fan
+   sensor.mold_indicator:
+    icon: mdi:biohazard
+   switch.kitchen_door:
+    icon: mdi:door
+   switch.garage:
+    icon: mdi:garage
+   light.ceiling_fan:
+    icon: mdi:fan  
+   light.charger:
+    icon: mdi:power-plug
+   light.humidifier:
+    icon: mdi:air-humidifier
+   switch.pillbottle:
+    icon: mdi:pill

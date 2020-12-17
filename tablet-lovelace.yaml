@@ -1,0 +1,235 @@
+title: Los Sams Home
+# Include external resources
+resources:
+  - url: /local/my-webfont.css
+    type: css
+  - url: /local/community/mini-graph-card/mini-graph-card-bundle.js
+    type: module
+    
+views:
+  - icon: mdi:home-floor-1
+    title: 1stFloor
+    id: 1stFloor
+    panel: true
+    cards:
+        - type: picture-elements
+          image: /local/1stfloor.png
+          elements:
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: group.downstairs
+              style:
+                top: 65%
+                left: 20%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.socket4
+              style:
+                top: 45%
+                left: 14%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.socket5
+              style:
+                top: 82%
+                left: 11%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.socket2
+              style:
+                top: 30%
+                left: 40%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.grow
+              style:
+                top: 22%
+                left: 55%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: switch.4884502084f3eb8abb49
+              style:
+                top: 75%
+                left: 85%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.back_door
+              style:
+                top: 38%
+                left: 96%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.back_porch
+              style:
+                top: 15%
+                left: 85%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: cover.garage
+              style:
+                top: 15%
+                left: 95%
+            - type: state-label
+              tap_action:
+                action: more-info
+              entity: cover.garage
+              style:
+                top: 21%
+                left: 95%
+                color: "#5085BF"           
+            - type: state-icon
+              tap_action:
+                action: more-info
+              entity: climate.nest
+              style:
+                top: 70%
+                left: 45%
+            - type: state-label
+              tap_action:
+                action: more-info
+              entity: sensor.nest_temperature
+              style:
+                top: 77%
+                left: 45%
+                color: "#5085BF"
+            - type: conditional
+              conditions:
+                - entity: device_tracker.sam
+                  state: 'home'
+              elements:
+                - type: state-icon
+                  tap_action:
+                    action: more-info
+                  entity: device_tracker.sam
+                  style:
+                    top: 8%
+                    left: 3% 
+            - type: conditional
+              conditions:
+                - entity: device_tracker.sammy
+                  state: 'home'
+              elements:
+                - type: state-icon
+                  tap_action:
+                    action: more-info
+                  entity: device_tracker.sammy
+                  style:
+                    top: 8%
+                    left: 9% 
+  - icon: mdi:home-floor-2
+    title: 2ndFloor
+    id: 2ndFloor
+    panel: true
+    cards:
+        - type: picture-elements
+          image: /local/2ndfloor.png
+          elements:
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.hallway
+              style:
+                top: 50%
+                left: 42%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.night
+              style:
+                top: 33%
+                left: 19%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.ceiling_fan
+              style:
+                top: 55%
+                left: 19%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.ceiling_light
+              style:
+                top: 70%
+                left: 18%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.humidifier
+              style:
+                top: 79%
+                left: 23%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.charger
+              style:
+                top: 36%
+                left: 15%
+  - icon: mdi:home-floor-3
+    title: 3rdFloor
+    id: 3rdFloor
+    panel: true
+    cards:
+        - type: picture-elements
+          image: /local/3rdfloor.png
+          elements:
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.third_floor
+              style:
+                top: 50%
+                left: 45%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.love
+              style:
+                top: 77%
+                left: 62.5%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.socket3
+              style:
+                top: 35%
+                left: 23%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.window_fan
+              style:
+                top: 68%
+                left: 20%
+            - type: state-icon
+              tap_action:
+                action: toggle
+              entity: light.socket7
+              style:
+                top: 25%
+                left: 62%
+            - type: state-icon
+              tap_action:
+                action: more-info
+              entity: climate.honeywell
+              style:
+                top: 50%
+                left: 55.5%
+            - type: state-label
+              tap_action:
+                action: more-info
+              entity: sensor.honeywell_temperature
+              style:
+                top: 55%
+                left: 55.5%
+                color: "#5085BF"

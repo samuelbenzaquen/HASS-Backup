@@ -1,0 +1,99 @@
+  alert_script:
+    sequence:
+      - service: light.turn_on
+        data:
+          entity_id: light.porch_strip
+          effect: 'sinelon'
+      - delay:
+          seconds: 4
+      - service: light.turn_off
+        data:
+          entity_id: light.porch_strip
+          
+  backyardlight:
+    sequence:
+      - service: light.turn_on
+        data:
+          entity_id: light.back_porch
+      - delay:
+          minutes: 5
+      - service: light.turn_off
+        data:
+          entity_id: light.back_porch
+          
+  lora_mazda:   
+    sequence:
+      - service: automation.turn_off
+        data:
+          entity_id: automation.lora_mazda
+      - service: light.turn_on
+        data:
+          entity_id: light.garage
+      - delay:
+          minutes: 5
+      - service: automation.turn_on
+        data:
+          entity_id: automation.lora_mazda
+
+  lora_garage:   
+    sequence:
+      - service: automation.turn_off
+        data:
+          entity_id: automation.lora_garage
+      - service: mqtt.publish
+        data:
+          topic: "/lora/inbound"
+          payload: "open garage"
+      - delay:
+          minutes: 1
+      - service: automation.turn_on
+        data:
+          entity_id: automation.lora_garage
+
+  nest_heat_away:
+    sequence:
+      - condition: state
+        entity_id: 'climate.nest'
+        state: 'heat'
+      - service: climate.set_temperature
+        data:
+          entity_id: climate.nest
+          temperature: '55'
+  
+  nest_heat_home:
+    sequence:
+      - condition: state
+        entity_id: 'climate.nest'
+        state: 'heat'
+      - service: climate.set_temperature
+        data:
+          entity_id: climate.nest
+          temperature: '66'
+ 
+  nest_cool_away:
+    sequence:
+      - condition: state
+        entity_id: 'climate.nest'
+        state: 'cool'
+      - service: climate.set_temperature
+        data:
+          entity_id: climate.nest
+          temperature: '85'
+  
+  nest_cool_home:
+    sequence:
+      - condition: state
+        entity_id: 'climate.nest'
+        state: 'cool'
+      - service: climate.set_temperature
+        data:
+          entity_id: climate.nest
+          temperature: '78'
+ 
+  dashbutton:
+    sequence:
+      - service: mqtt.publish
+        data:
+          topic: "/Alert/Message/"
+          payload: "DashButton was pressed"
+        
